@@ -17,14 +17,18 @@ st.title('Scrapping quotes from BrainyQuotes and GoodReads!')
 t = st.text_input("Enter a topic to scrap quotes")
 start = st.button("Get Quotes")
 showdf = st.sidebar.checkbox('Show raw dataframe')
+showqo = st.checkbox('Show quotes and authors')
 showwc = st.sidebar.checkbox('Show word cloud')
 showwf = st.sidebar.checkbox("Show tag Frequency")
+author_name = st.sidebar.text_input("Search by name of author")
+searchba = st.sidebar.button("Search")
 
 @st.cache(suppress_st_warning=True)
 def scrap_quotes(t):
     open("output_1.json", 'w').truncate(0)
     open("output_2.json", 'w').truncate(0)
-
+    
+    st.text("Scraping quotes based on %s .... Wait a moment"%t)
     topic=t
     spiders = {"goodreads":"output_1.json","brainyquotes":"output_2.json"}
     for spider in spiders:
@@ -54,11 +58,24 @@ def makeWordCloud(all_words, color):
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis("off")
     st.pyplot()
+
 if str(t) and not str(t).isspace():
     df = scrap_quotes(str(t))
 
     if showdf:
         st.dataframe(df)
+
+    if showqo:
+        for index, row in df.iterrows():
+            st.write("\n"+ row['text'] +"\n"+ row['author'])
+    
+    if searchba:
+        st.header("Showing all quotes by %s"%str(author_name))
+        #st.write(df.loc[df['author'] == author_name])
+        
+        for index, row in df.iterrows():
+            if row['author'] == author_name:
+                st.write("\n"+ row['text'] +"\n"+ row['author'])   
 
     if showwf:
         freq_words = []
