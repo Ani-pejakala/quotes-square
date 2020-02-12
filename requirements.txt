@@ -4,5 +4,5 @@ regex==2019.11.1
 Scrapy==1.8.0
 streamlit==0.55.0
 wordcloud==1.6.0
-nltk==1.11.0
+nltk==3.4.5
 
