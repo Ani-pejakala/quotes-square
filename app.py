@@ -59,6 +59,9 @@ def makeWordCloud(all_words, color):
     plt.axis("off")
     st.pyplot()
 
+if start and str(t)=="":
+    st.error("Please enter a topic... and try again")
+
 if str(t) and not str(t).isspace():
     df = scrap_quotes(str(t))
 
@@ -71,11 +74,12 @@ if str(t) and not str(t).isspace():
     
     if searchba:
         st.header("Showing all quotes by %s"%str(author_name))
-        #st.write(df.loc[df['author'] == author_name])
-        
-        for index, row in df.iterrows():
-            if row['author'] == author_name:
-                st.write("\n"+ row['text'] +"\n"+ row['author'])   
+        df1 = df[df['author'].str.contains(author_name)]
+        for index, row in df1.iterrows():
+            st.write("\n"+ row['text'] +"\n"+ row['author'])
+        if len(df1.index)==0:
+            st.error("No quotes found for %s"%author_name)
+ 
 
     if showwf:
         freq_words = []
