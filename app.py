@@ -10,18 +10,20 @@ from string import punctuation
 import re
 import string
 import nltk
-# import spider class
-from quotes.spiders import goodreads
+import random
 
 st.title('Scrapping quotes from BrainyQuotes and GoodReads!')
 t = st.text_input("Enter a topic to scrap quotes")
 start = st.button("Get Quotes")
 showdf = st.sidebar.checkbox('Show raw dataframe')
 showqo = st.checkbox('Show quotes and authors')
+seed = st.text_input("Enter length of quote to be generated")
+genqo = st.button("Generate Quote")
 showwc = st.sidebar.checkbox('Show word cloud')
 showwf = st.sidebar.checkbox("Show tag Frequency")
 author_name = st.sidebar.text_input("Search by name of author")
 searchba = st.sidebar.button("Search")
+
 
 @st.cache(suppress_st_warning=True)
 def scrap_quotes(t):
@@ -59,6 +61,47 @@ def makeWordCloud(all_words, color):
     plt.axis("off")
     st.pyplot()
 
+def makestring(df, length):
+    contents = ""
+    
+    for index, row in df.iterrows():
+        contents = contents+"".join(row['text']).lstrip().replace("\"",' ')
+    
+    translator=str.maketrans('','',punctuation)
+    data=contents.translate(translator)
+   
+    #'''Make a rule dict for given data.'''
+    rule = {}
+    words = data.split(' ')
+    context = 2
+    index = context
+ 
+    for word in words[index:]:
+        key = ' '.join(words[index-context:index])
+        if key in rule:
+            rule[key].append(word)
+        else:
+            rule[key] = [word]
+        index += 1   
+    #'''Use a given rule to make a string.'''
+    oldwords = random.choice(list(rule.keys())).split(' ') #random starting words
+    string = ' '.join(oldwords) + ' '
+ 
+    for i in range(length):
+        try:
+            key = ' '.join(oldwords)
+            newword = random.choice(rule[key])
+            string += newword + ' '
+ 
+            for word in range(len(oldwords)):
+                oldwords[word] = oldwords[(word + 1) % len(oldwords)]
+            oldwords[-1] = newword
+ 
+        except KeyError:
+            return string
+    return string
+
+
 if start and str(t)=="":
     st.error("Please enter a topic... and try again")
 
@@ -67,6 +110,9 @@ if str(t) and not str(t).isspace():
 
     if showdf:
         st.dataframe(df)
+
+    if genqo:
+        st.write(makestring(df, int(seed)))
 
     if showqo:
         for index, row in df.iterrows():
